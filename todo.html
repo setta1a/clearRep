@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <style>
+        body{
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            font-size: 18px;
+            color:#35495e;
+        }
+        .container{
+            width: 700px;
+            margin: auto;
+            margin: 25px;
+        }
+        ul{
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+        li{
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 2px solid #41b782;
+            margin: 10px 0;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+        li:hover{
+            background: #5cb88f33;
+        }
+        #app{
+            display: flex;
+            align-items: flex-start;
+        }
+        .sticker{
+            width: 300px;
+            height: 300px;
+            border: 1px solid #282e49;
+            margin: 30px;
+            padding: 10px 20px;
+            flex-grow: 0;
+            overflow: hidden;
+        }
+        .sidepanel{
+            display: block;
+            padding: 15px;
+            width: 300px;
+            height: 100vh;
+            background-color: #282e49;
+            color: #fff;
+            box-sizing: border-box;
+        }
+        .divider{
+            height: 5px;
+            width: 50px;
+            border: 0;
+            background-color: #6372b4;
+            margin: -10px 0 15px;
+        }
+        .input-field{
+            width: 100%;
+            border-radius: 3px;
+            border: 0;
+            padding: 5px 10px;
+            margin: 7px 0;
+            box-sizing: border-box;
+        }
+        .sidepanel label{
+            display: inline-block;
+            margin: 15px 0 5px 0;
+        }
+        button{
+            padding: 10px 30px;
+            background-color: transparent;
+            border: 3px solid #35495e;
+            font-size: 16px;
+            cursor: pointer;
+            transition: .1s;
+            background-color: #41b782;
+        }
+        button:hover{
+            background-color: #41b782;
+        }
+        button:active{
+            transform: scale(0.96);
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <aside class="sidepanel">
+            <h2>Добавление</h2>
+            <hr class="divider">
+            <label for="text">Текст:</label>
+            <textarea id="text" v-model="newTask" class="input-field"></textarea>
+            <label for="text">Дедлайн:</label>
+            <input id="deadLine" type="date" v-model="newDeadLine" class="input-field">
+            <button @click="addNewTask(newTask)">Добавить дело</button>
+            <label for="font">Сортировка:</label>
+            <select id="font" class="input-field" v-model="sortType">
+                <option value="byAlphabet">По алфавиту</option>
+                <option value="byDate">По сроку выполнения</option>
+            </select>
+            <button @click="sortTasks">Отсортировать список</button>
+        </aside>
+        <div class="container">
+            <h2>Список дел:</h2>
+            <ul>
+                <li v-for="(task, index) in todo">
+                    <span>{{task[0]}}</span>
+                    <span>
+                        (Дедлайн: {{task[1]}})
+                        <button @click="deleteTask(index)">Удалить</button>
+                        <button @click="pushToCompleted(index)">Перенести</button>
+                    </span>
+                </li>
+            </ul>
+            
+        </div>
+        <div class="container">
+            <h2>Сделанные Дела:</h2>
+            <ul>
+                <li v-for="task in completed_tasks">
+                    <span style="text-decoration: line-through">{{task[0]}}</span>
+                    <span>
+                        (Дедлайн: Сделано)
+                    </span>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script>
+        new Vue({
+            el: '#app',
+                data: {
+                todo:[
+                    ['А', "07-12-2022"],
+                    ['Б', "06-12-2022"],
+                    ['Г',"05-12-2022"],
+                    ['В', "04-12-2022"],
+                    ['Д', "03-12-2022"]
+                ],
+                completed_tasks: [
+                ],
+                newTask: "Новое Дело",
+                newDeadLine: "2022-12-01",
+                sortType: "byAlphabet"
+            },
+            methods: {
+                addNewTask: function (task) {
+                    this.todo.push([task, this.changeDate(this.newDeadLine)])
+                },
+                changeDate: function(dateToCahnge) {
+                    return dateToCahnge.split("-").reverse().join("-")
+                },
+                sortTasks: function() {
+                    console.clear()
+                    if (this.sortType == "byAlphabet") {
+                        for (let j = 0; j < this.todo.length; j++) {
+                            for (let i = j; i < this.todo.length - 1; i++) {
+                                console.log(this.todo[i][0], this.todo[i + 1][0])
+                                console.log(this.todo[i][0].charCodeAt(0) > this.todo[i + 1][0].charCodeAt(0))
+                                if (this.todo[i][0].charCodeAt(0) > this.todo[i + 1][0].charCodeAt(0)) {
+                                    let temp = this.todo[i];
+                                    this.todo[i] = this.todo[i + 1];
+                                    this.todo[i + 1] = temp;
+                                }
+                            }
+                        }
+                    } else {
+                        for (let j = 0; j < this.todo.length; j++) {
+                            for (let i = 0; i < this.todo.length - 1; i++) {
+                                const newDate1 = new Date(this.changeDate(this.todo[i][1]))
+                                const newDate2 = new Date(this.changeDate(this.todo[i+1][1]))
+                                console.log(newDate1)
+                                console.log(newDate2)
+                                if (newDate1 > newDate2) {
+                                    let temp = this.todo[i];
+                                    this.todo[i] = this.todo[i + 1];
+                                    this.todo[i + 1] = temp;
+                                }
+                            }
+                        }
+                    }
+                },
+                deleteTask: function(index) {
+                    this.todo.splice(index, 1)
+                },
+                pushToCompleted: function(index) {
+                    this.completed_tasks.push(this.todo[index])
+                    this.todo.splice(index, 1)
+                }
+            }
+        })
+    </script>
+</body>
+</html>
